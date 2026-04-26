@@ -1,0 +1,32 @@
+# Kuantum Makine Öğrenmesi
+pennylane==0.39.0
+pennylane-lightning==0.39.0
+
+# Derin Öğrenme
+torch==2.4.0
+
+# Klasik ML
+scikit-learn==1.5.0
+xgboost==2.1.0
+lightgbm==4.5.0
+imbalanced-learn==0.13.0
+
+# Açıklanabilirlik
+shap==0.46.0
+
+# Veri işleme
+pandas==2.2.0
+numpy==1.26.4
+scipy==1.13.0
+
+# Görselleştirme
+matplotlib==3.9.0
+seaborn==0.13.2
+
+# Notebook ortamı
+jupyter==1.0.0
+ipykernel==6.29.0
+ipywidgets==8.1.0
+
+# İstatistiksel testler (zaten scipy içinde, açık import için)
+statsmodels==0.14.0
