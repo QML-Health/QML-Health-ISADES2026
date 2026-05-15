@@ -1,4 +1,4 @@
-# Sağlık Verileri Üzerinde Klasik–Kuantum Makine Öğrenmesi: Çapraz-Bağlam Karşılaştırmalı Bir Çalışma
+# A comprehensive study of quantum machine learning
 
 [![Python](https://img.shields.io/badge/Python-3.11-blue.svg)](https://www.python.org/)
 [![PennyLane](https://img.shields.io/badge/PennyLane-0.39-7B5BA6.svg)](https://pennylane.ai/)
@@ -7,143 +7,128 @@
 [![License](https://img.shields.io/badge/Lisans-MIT-green.svg)](LICENSE)
 [![ISADES 2026](https://img.shields.io/badge/ISADES-2026-C44569.svg)](#)
 
-> **ISADES 2026 — International Symposium on Applied Data Engineering and Sciences** sempozyumuna sunulan makalenin tüm kodları, deney protokolleri ve analiz betikleri.
+> All code, experimental protocols, and analysis scripts for the paper submitted to the **ISADES 2026 — International Symposium on Applied Data Engineering and Sciences.** 
 
-Bu çalışma, kuantum makine öğrenmesinin (QML) sağlık sınıflandırma görevlerindeki performansını **iki kontrastlı veri seti** üzerinde sistematik olarak değerlendirmektedir: **Wisconsin Breast Cancer Diagnostic (WBCD)** (ikili, %100 gerçek) ve **Estimation of Obesity Levels** (yedi-sınıflı, %77 SMOTE ile sentetik).
+This study systematically evaluates the performance of quantum machine learning (QML) on health classification tasks using **two contrasting datasets**: **Wisconsin Breast Cancer Diagnostic (WBCD)** (binary, 100% real) and **Estimation of Obesity Levels** (seven-class, 77% synthetic via SMOTE).
 
-![Çapraz-Bağlam Klasik–Kuantum Açıklığı](figures/banner_capraz_baglam.png)
+![Cross-Context Classical–Quantum Clarity](figures/banner_capraz_baglam.png)
 
-*WBCD'de klasik–kuantum doğruluk farkı yalnızca **5.05 puan** (Cohen's d = 1.70) iken, obezite veri setinde bu açıklık **14.68 puan**'a (Cohen's d = 5.13) yükselmektedir. Wilcoxon signed-rank testi her iki veri setinde p = 0.0312 ile klasik üstünlüğü doğrular.*
-
----
-
-##  İçindekiler
-
-- [Çalışmanın Özeti](#-çalışmanın-özeti)
-- [Anahtar Bulgular](#-anahtar-bulgular)
-- [Repo Yapısı](#-repo-yapısı)
-- [Kurulum](#-kurulum)
-- [Kullanım](#-kullanım)
-- [Veri Setleri](#-veri-setleri)
-- [Modeller](#-modeller)
-- [Görseller](#-görseller)
-- [Sonuçlar](#-sonuçlar)
-- [Atıf](#-atıf)
-- [Yazarlar](#-yazarlar)
-- [Lisans](#-lisans)
+*While the difference in accuracy between classical and quantum methods in the WBCD dataset is only **5.05 points** (Cohen’s d = 1.70), this gap increases to **14.68 points** (Cohen’s d = 5.13) in the obesity dataset. The Wilcoxon signed-rank test confirms classical superiority in both datasets with p = 0.0312.*
 
 ---
 
-##  Çalışmanın Özeti
+##  Table of Contents
 
-Çalışma, QML modellerinin yapısal olarak farklı iki sağlık sınıflandırma görevindeki davranışını ortak bir 5-katlı stratified çapraz doğrulama protokolü altında **35 model varyantı** (16 WBCD + 19 obezite) üzerinden karşılaştırır. Önerilen başlıca yöntemsel katkılar:
-
-1. **Çapraz-bağlam değerlendirme protokolü** — QML'in klasik baseline'lara karşı performans açıklığının veri seti karakteristiklerine göre nasıl değiştiğini ölçer
-2. **Q-Hybrid-Q3-Plus mimarisi** — Re-uploading (6 qubit, 2 blok) + Amplitude (4 qubit, 2 katman) çift-kollu hibrit yapısı; obezite görevinde saf kodlamaların %19.7 puan üzerine çıkararak %81.54 doğruluğa ulaşır
-3. **Encoding aile ablasyonu** — Angle, IQP, Amplitude, Re-uploading ailelerinin qubit sayısı ve derinlik kombinasyonları altında sistematik taranması
-4. **Gürültü robustluğu analizi** — Depolarizing ve bit-flip kanalları altında p ∈ [0, 0.20] aralığında dayanıklılık testleri
+- [Abstract](#-çalışmanın-özeti)
+- [Key Findings](#-anahtar-bulgular)
+- [Repo Structure](#-repo-yapısı)
+- [Installation](#-kurulum)
+- [Usage](#-kullanım)
+- [Datasets](#-veri-setleri)
+- [Models](#-modeller)
+- [Visualizations](#-görseller)
+- [Results](#-sonuçlar)
+- [Citation](#-atıf)
+- [Authors](#-yazarlar)
+- [License](#-lisans)
 
 ---
 
-##  Anahtar Bulgular
+##  Abstract
 
-| Boyut | WBCD | Obezite |
+This study compares the performance of QML models across two structurally distinct health classification tasks using a common 5-fold stratified cross-validation protocol across **35 model variants** (16 WBCD + 19 obesity). The main methodological contributions proposed are:
+
+1. **Cross-context evaluation protocol** — Measures how QML’s performance gap relative to classical baselines varies according to dataset characteristics
+2. **Q-Hybrid-Q3-Plus architecture** — A two-arm hybrid structure combining Re-uploading (6 qubits, 2 blocks) and Amplitude (4 qubits, 2 layers); achieves 81.54% accuracy in the obesity task, outperforming pure encodings by 19.7 percentage points
+3. **Encoding family ablation** — Systematic screening of qubit count and depth combinations across the Angle, IQP, Amplitude, and Re-uploading families
+4. **Noise robustness analysis** — Robustness tests under depolarizing and bit-flip channels for p ∈ [0, 0.20]
+
+---
+
+## Key Findings
+
+| Dimension | WBCD | Obesity |
 |-------|:----:|:-------:|
-| Sınıflandırma türü | İkili | 7-sınıflı |
-| Örnek sayısı | 569 | 2 087 |
-| Veri kaynağı | %100 gerçek | %77 SMOTE |
-| **Klasik şampiyon** | SVM-RBF | XGBoost-Top10 |
-| Klasik CV doğruluğu | **0.9802 ± 0.0044** | **0.9623 ± 0.0061** |
-| **Kuantum şampiyon** | VQC ReUpload-6q-3blok | Q-Hybrid-Q3-Plus |
-| Kuantum CV doğruluğu | **0.9297 ± 0.0292** | **0.8154 ± 0.0227** |
-| **Doğruluk farkı** | **5.05 puan** | **14.68 puan** |
-| **Cohen's d (eşli)** | **1.70** (büyük) | **5.13** (çok büyük) |
-| **Wilcoxon p (tek-yönlü)** | **0.0312*** | **0.0312*** |
+| Classification type | Binary | 7-class |
+| Sample size | 569 | 2,087 |
+| Data source | 100% real | 77% SMOTE |
+| **Classic champion** | SVM-RBF | XGBoost-Top10 |
+| Classic CV accuracy | **0.9802 ± 0.0044** | **0.9623 ± 0.0061** |
+| **Quantum champion** | VQC ReUpload-6q-3block | Q-Hybrid-Q3-Plus |
+| Quantum CV accuracy | **0.9297 ± 0.0292** | **0.8154 ± 0.0227** |
+| **Accuracy difference** | **5.05 points** | **14.68 points** |
+| **Cohen's d (paired)** | **1.70** (large) | **5.13** (very large) |
+| **Wilcoxon p (one-tailed)** | **0.0312*** | **0.0312*** |
 
-Detaylı sonuçlar için → [Sonuçlar](#-sonuçlar) bölümü
+For detailed results. → [Results](#-sonuçlar) section
 
 ---
 
-##  Repo Yapısı
+##  Repo Structure
 
 ```
 QML-Health-ISADES2026/
 │
-├── notebooks/                          # Tüm deney notebook'ları
-│   ├── QML_BreastCancer_ISADES2026.ipynb       # WBCD ana notebook
-│   ├── QML_Obesity_ISADES2026.ipynb            # Obezite ana notebook
-│   ├── obesity_classical_models.ipynb          # Obezite klasik baseline
-│   ├── obesity_quantum_models.ipynb            # Obezite saf kuantum
-│   └── obesity_hybrid_quantum.ipynb            # Q-Hybrid-Q3-Plus ablasyonu
+├── notebooks/                          # All notebooks
+│   ├── QML_BreastCancer_ISADES2026.ipynb       # WBCD main notebook
+│   ├── QML_Obesity_ISADES2026.ipynb            # Obesity main notebook
+│   ├── obesity_classical_models.ipynb          # Obesity classic baseline
+│   ├── obesity_quantum_models.ipynb            # Obesity pure quantum
+│   └── obesity_hybrid_quantum.ipynb            # Q-Hybrid-Q3-Plus ablation
 │
-├── figures/                            # Makale ve README görselleri
-│   ├── banner_capraz_baglam.png        # Anahtar görsel (4-panel)
-│   ├── wbcd/                           # WBCD görselleri
+├── figures/                            
+│   ├── banner_capraz_baglam.png        
+│   ├── wbcd/                           
 │   │   ├── roc_curves.png
 │   │   ├── encoding_heatmap.png
 │   │   ├── quantum_champion_cm.png
 │   │   └── noise_robustness.png
-│   ├── obesity/                        # Obezite görselleri
+│   ├── obesity/                        # Obesity figures
 │   │   ├── q3plus_confusion_matrix.png
 │   │   ├── reupload_ablation.png
 │   │   ├── encoding_families.png
 │   │   └── all_quantum_models.png
-│   ├── shap/                           # SHAP açıklanabilirlik
+│   ├── shap/                           # SHAP 
 │   │   ├── combined_shap.png
 │   │   
-│   └── stats/                          # İstatistiksel testler
+│   └── stats/                          # Tests
 │       └── wilcoxon_folds.png
 │
-├── results/                            # Sayısal sonuç dosyaları (JSON/CSV)
-│   ├── wbcd/
-│   │   ├── classical_models.json
-│   │   ├── quantum_models.json
-│   │   └── noise_spectrum.json
-│   └── obesity/
-│       ├── classical_models.json
-│       ├── quantum_models.json
-│       ├── wilcoxon_test.json
-│       └── shap_xgboost.json
+├── results/                            # Results(JSON/CSV)
+│       
 │
-├── data/                               # Veri set bilgileri
-│   └── README.md                       # Veri setlerine erişim talimatları
-│
-├── docs/                               # Ek dökümantasyon
-│   ├── METHODOLOGY.md                  # Detaylı yöntem açıklamaları
-│   └── HYPERPARAMETERS.md              # Tüm modellerin hiperparametreleri
-│
-├── requirements.txt                    # Python bağımlılıkları
-├── LICENSE                             # MIT lisansı
-└── README.md                           # Bu dosya
+├
+├── LICENSE                             # MIT lisannce
+└── README.md                           
 ```
 
 ---
 
-##  Kurulum
+##  Installation
 
-### Gereksinimler
+### Requirements
 
-- Python 3.11 veya üzeri
-- 8 GB+ RAM (kuantum simülasyonlar için)
-- (Opsiyonel) GPU — yalnızca XGBoost hızlandırma için
+- Python 3.11 or later
+- 8 GB+ RAM (for quantum simulations)
+- (Optional) GPU — only for XGBoost acceleration
 
-### Adım 1: Repoyu klonlayın
+### Step 1: Clone the repository
 
 ```bash
 git clone https://github.com/QML-Health/QML-Health-ISADES2026.git
 cd QML-Health-ISADES2026
 ```
 
-### Adım 2: Sanal ortam oluşturun
+### Step 2: Create a virtual environment
 
 ```bash
 python -m venv venv
 source venv/bin/activate          # Linux/macOS
-# veya
+# or
 venv\Scripts\activate             # Windows
 ```
 
-### Adım 3: Bağımlılıkları yükleyin
+### Step 3: Install dependencies
 
 ```bash
 pip install -r requirements.txt
@@ -166,94 +151,91 @@ jupyter==1.0.0
 
 ---
 
-##  Kullanım
+## Usage
 
-### Google Colab ile (Önerilen — kuantum simülasyonlar GPU gerektirmez)
+### With Google Colab (Recommended — quantum simulations do not require a GPU)
 
-Notebook'ları doğrudan Colab'da açıp çalıştırabilirsiniz:
+You can open and run the notebooks directly in Colab:
 
-| Notebook | Çalışma süresi | Açıklama |
+| Notebook | Runtime | Description |
 |----------|:--------------:|----------|
-| `QML_BreastCancer_ISADES2026.ipynb` | ~45 dk | WBCD: 6 klasik + 10 kuantum model |
-| `QML_Obesity_ISADES2026.ipynb` | ~120 dk | Obezite: tüm fazlar + Wilcoxon |
-| `obesity_hybrid_quantum.ipynb` | ~30 dk | Q-Hybrid-Q3-Plus ablasyonu |
+| `QML_BreastCancer_ISADES2026.ipynb` | ~45 min | WBCD: 6 classical + 10 quantum models |
+| `QML_Obesity_ISADES2026.ipynb` | ~120 min | Obesity: all phases + Wilcoxon |
+| `obesity_hybrid_quantum.ipynb` | ~30 min | Q-Hybrid-Q3-Plus ablation |
 
-### Yerel makinede
-
+### On a local machine
 ```bash
 jupyter notebook notebooks/
 ```
 
-### Sonuçları yeniden üretmek için
+### To reproduce the results
 
 ```python
-# Tüm rastgelelik tohumları sabitlenmiştir
+# All randomness seeds are fixed
 RANDOM_STATE = 42
 np.random.seed(42)
 torch.manual_seed(42)
 ```
 
-5-katlı CV bölünmeleri `StratifiedKFold(n_splits=5, shuffle=True, random_state=42)` ile yeniden üretilebilir.
+5-fold CV splits can be reproduced using `StratifiedKFold(n_splits=5, shuffle=True, random_state=42)`.
 
 ---
 
-##  Veri Setleri
-
+## Datasets
 ### 1. Wisconsin Breast Cancer Diagnostic (WBCD)
 
-- **Kaynak:** [UCI Machine Learning Repository](https://archive.ics.uci.edu/dataset/17/breast+cancer+wisconsin+diagnostic)
-- **Atıf:** Wolberg, W. H., Street, W. N., & Mangasarian, O. L. (1995). *Breast Cancer Wisconsin (Diagnostic) Data Set*. UCI Machine Learning Repository.
-- **Örnek sayısı:** 569
-- **Öznitelik sayısı:** 30 (sürekli)
-- **Sınıf dağılımı:** Malign (37.3%) / Benign (62.7%)
-- **Erişim:** `sklearn.datasets.load_breast_cancer()` ile doğrudan yüklenebilir
+- **Source:** [UCI Machine Learning Repository](https://archive.ics.uci.edu/dataset/17/breast+cancer+wisconsin+diagnostic)
+- **Citation:** Wolberg, W. H., Street, W. N., & Mangasarian, O. L. (1995). *Breast Cancer Wisconsin (Diagnostic) Data Set*. UCI Machine Learning Repository.
+- **Number of samples:** 569
+- **Number of features:** 30 (continuous)
+- **Class distribution:** Malignant (37.3%) / Benign (62.7%)
+- **Access:** Can be loaded directly using `sklearn.datasets.load_breast_cancer()`
 
 ### 2. Estimation of Obesity Levels Based on Eating Habits and Physical Condition
 
-- **Kaynak:** [Data in Brief (Palechor & De la Hoz Manotas, 2019)](https://doi.org/10.1016/j.dib.2019.104344)
-- **Örnek sayısı:** 2 087 (485 orijinal + 1 602 SMOTE)
-- **Öznitelik sayısı:** 16 (8 sayısal + 8 kategorik)
-- **Sınıf sayısı:** 7 (Yetersiz Kilolu, Normal, Aşırı Kilolu I-II, Obezite Tip I-III)
-- **Önemli not:** Veri setinin %77'si SMOTE algoritmasıyla sentetik olarak üretilmiştir; bu durum [Yöntem](docs/METHODOLOGY.md) bölümünde detaylı tartışılmıştır
-
+- **Source:** [Data in Brief (Palechor & De la Hoz Manotas, 2019)](https://doi.org/10.1016/j.dib.2019.104344)
+- **Number of samples:** 2,087 (485 original + 1,602 SMOTE)
+- **Number of features:** 16 (8 numerical + 8 categorical)
+- **Number of classes:** 7 (Underweight, Normal, Overweight I-II, Obesity I-III)
+- **Important note:** 77% of the dataset was synthetically generated using the SMOTE algorithm; this is discussed in detail in the [Method](docs/METHODOLOGY.md) section
 ---
 
-##  Modeller
+## Models
 
-### Klasik Modeller (toplam 18)
+### Classical Models (18 in total)
 
-#### WBCD (6 model)
-- Lojistik Regresyon, SVM-RBF, Random Forest, XGBoost, KNN, MLP
+#### WBCD (6 models)
+- Logistic Regression, SVM-RBF, Random Forest, XGBoost, KNN, MLP
 
-#### Obezite (12 model — 16 öznitelik vs Top-10 ayrımıyla)
-- Yukarıdakilere ek olarak: SVM-Linear, Naive Bayes, Decision Tree, AdaBoost, Gradient Boosting, LightGBM
+#### Obesity (12 models — 16 features vs. Top-10 classification)
+- In addition to the above: SVM-Linear, Naive Bayes, Decision Tree, AdaBoost, Gradient Boosting, LightGBM
 
-### Kuantum Modeller (toplam 17)
+### Quantum Models (total 17)
 
-#### WBCD (10 model)
-| Aile | Konfigürasyonlar |
+#### WBCD (10 models)
+| Family | Configurations |
 |------|-----------------|
 | **Angle Embedding** | 4q, 6q |
 | **IQP Embedding** | 4q, 6q |
-| **Amplitude Embedding** | 5q (32 boyut) |
-| **Re-uploading** | 4q, 6q (1/2/3 blok ablasyonu) |
+| **Amplitude Embedding** | 5q (32 dimensions) |
+| **Re-uploading** | 4q, 6q (1/2/3-block ablation) |
 | **Quantum Kernel SVM** | 4q, 6q |
 
-#### Obezite (7 model)
-| Aile | Konfigürasyonlar |
+#### Obesity (7 models)
+| Family | Configurations |
 |------|-----------------|
-| **Pure Angle** | 6q × 3 katman |
-| **Pure Amplitude** | 4q × 3 katman |
-| **Pure Re-uploading** | 6q × 1/2/3 blok |
-| **Q-Hybrid-Q3 (DualBranch)** | Angle-6q + Amplitude-4q paralel |
-| **Q-Hybrid-Q3-Plus**  | Re-uploading-6q + Amplitude-4q paralel |
+| **Pure Angle** | 6q × 3 layers |
+| **Pure Amplitude** | 4q × 3 layers |
+| **Pure Re-uploading** | 6q × 1/2/3 blocks |
+| **Q-Hybrid-Q3 (DualBranch)** | Angle-6q + Amplitude-4q parallel |
+| **Q-Hybrid-Q3-Plus**  | Re-uploading-6q + Amplitude-4q parallel |
 
-### Q-Hybrid-Q3-Plus Mimarisi (Özgün Katkı)
+### Q-Hybrid-Q3-Plus Architecture (Original Contribution)
 
 ```
-Girdi (16 öznitelik)
-    ├── PCA-6 ──────► Re-uploading kolu (6q × 2 blok) ──► ⟨Z⟩ × 6
-    └── Top-8 ──────► Amplitude kolu (4q × 2 katman) ──► ⟨Z⟩ × 4
+Input (16 features)
+    ├── PCA-6 ──────► Re-uploading branch (6q × 2 block) ──► ⟨Z⟩ × 6
+    └── Top-8 ──────► Amplitude branch (4q × 2 layers) ──► ⟨Z⟩ × 4
                                                               │
                                 concat[10] ◄─────────────────┘
                                     │
@@ -262,101 +244,100 @@ Girdi (16 öznitelik)
                               Linear(64→7) → Softmax
 ```
 
-**Toplam öğrenilebilir parametre:** 54 (kuantum kısmı) + klasik baş
+**Total trainable parameters:** 54 (quantum part) + classical head
 
 ---
 
-##  Görseller
+## Figures
 
-### Yöntem ve Mimariler
+### Methods and Architectures
 
-#### Şekil 1 — Sistem Mimarisi
-![Sistem Mimarisi](figures/system_architecture.png)
+#### Figure 1 — System Architecture
+![System Architecture](figures/system_architecture.png)
 
-WBCD ve Obezite veri setlerinin paralel değerlendirme akışı — 5-katlı stratified CV altında 35 model varyantı.
+Parallel evaluation workflow for the WBCD and Obesity datasets — 35 model variants under 5-fold stratified CV.
 
-#### Şekil 2 — Q-Hybrid-Q3-Plus Devre Şeması
+#### Figure 2 — Q-Hybrid-Q3-Plus Circuit Diagram
 ![Q-Hybrid-Q3-Plus](figures/q3plus_circuit.png)
 
-Çift-kollu kuantum-klasik hibrit yapı.
+Two-arm quantum-classical hybrid architecture.
 
-### WBCD Sonuçları
+### WBCD Results
 
-#### Şekil 3 — ROC Eğrileri
+#### Figure 3 — ROC Curves
 ![WBCD ROC](figures/wbcd/roc_curves.png)
 
-> **Drive yolu:** `MyDrive/QML_ISADES2026/gorseller/ROC_FINAL_v2_MAKALE.png`
+> **Drive path:** `MyDrive/QML_ISADES2026/gorseller/ROC_FINAL_v2_MAKALE.png`
 
-#### Şekil 4 — Encoding Aile Heatmap
+#### Figure 4 — Encoding Family Heatmap
 ![WBCD Encoding](figures/wbcd/encoding_heatmap.png)
 
-> **Drive yolu:** `MyDrive/QML_ISADES2026/gorseller/HEATMAP_Encoding_FINAL.png`
+> **Drive path:** `MyDrive/QML_ISADES2026/gorseller/HEATMAP_Encoding_FINAL.png`
 
-#### Şekil 5 — Kuantum Şampiyon Karışıklık Matrisi
+#### Figure 5 — Quantum Champion Confusion Matrix
 ![WBCD Champion CM](figures/wbcd/quantum_champion_cm.png)
 
-> **Drive yolu:** `MyDrive/QML_ISADES2026/gorseller/CM_Champion_ReUpload_6q_3block_FINAL.png`
+> **Drive path:** `MyDrive/QML_ISADES2026/images/CM_Champion_ReUpload_6q_3block_FINAL.png`
 
-#### Şekil 6 — Gürültü Robustluğu
+#### Figure 6 — Noise Robustness
 ![WBCD Noise](figures/wbcd/noise_robustness.png)
 
-> **Drive yolu:** `MyDrive/QML_ISADES2026/gorseller/NOISE_FULL_SPECTRUM_Champion_ReUpload_6q_3block.png`
+> **File path:** `MyDrive/QML_ISADES2026/images/NOISE_FULL_SPECTRUM_Champion_ReUpload_6q_3block.png`
 
-VQC ReUpload-6q-3blok modeli depolarizing p=0.20 altında %92.10, bit-flip p=0.20 altında %89.47 doğruluğunu korumaktadır.
+The VQC ReUpload-6q-3block model maintains an accuracy of 92.10% for depolarizing errors and 89.47% for bit-flip errors at p=0.20.
 
-### Obezite Sonuçları
+### Obesity Results
 
-#### Şekil 7 — Q-Hybrid-Q3-Plus Karışıklık Matrisi (7 sınıf)
+#### Figure 7 — Q-Hybrid-Q3-Plus Confusion Matrix (7 classes)
 ![Obesity Q3-Plus CM](figures/obesity/q3plus_confusion_matrix.png)
 
-> **Drive yolu:** `MyDrive/QML_Obesity_ISADES2026/gorseller/q3plus_confusion_matrix.png`
+> **Drive path:** `MyDrive/QML_Obesity_ISADES2026/images/q3plus_confusion_matrix.png`
 
-#### Şekil 8 — Re-uploading Derinlik Ablasyonu
+#### Figure 8 — Re-upload Depth Ablation
 ![Re-up Ablation](figures/obesity/reupload_ablation.png)
 
-> **Drive yolu:** `MyDrive/QML_Obesity_ISADES2026/gorseller/quantum_reupload_ablation.png`
+> **Drive path:** `MyDrive/QML_Obesity_ISADES2026/images/quantum_reupload_ablation.png`
 
-1-blok %51.05 → 2-blok %59.08 → 3-blok %61.83 — her blok yaklaşık 5 puan iyileşme.
+Block 1: 51.05% → Block 2: 59.08% → Block 3: 61.83% — approximately a 5-point improvement per block.
 
-#### Şekil 9 — Encoding Aile Karşılaştırması
+#### Figure 9 — Encoding Family Comparison
 ![Encoding Families](figures/obesity/encoding_families.png)
 
-> **Drive yolu:** `MyDrive/QML_Obesity_ISADES2026/gorseller/quantum_aile_karsilastirma.png`
+> **Drive path:** `MyDrive/QML_Obesity_ISADES2026/images/quantum_family_comparison.png`
 
-Saf kodlamaların %61-64 tavanı, hibrit Q3-Plus ile %81.54'e yükseliyor (+19.7 puan hibrit avantajı).
+The 61–64% ceiling of pure encodings rises to 81.54% with the hybrid Q3-Plus (+19.7-point hybrid advantage).
 
-#### Şekil 10 — Tüm Kuantum Modeller
+#### Figure 10 — All Quantum Models
 ![All Quantum Models](figures/obesity/all_quantum_models.png)
+> **Drive path:** `MyDrive/QML_Obesity_ISADES2026/gorseller/quantum_karsilastirma_bar.png`
 
-> **Drive yolu:** `MyDrive/QML_Obesity_ISADES2026/gorseller/quantum_karsilastirma_bar.png`
+### Cross-Context Analysis
 
-### Çapraz-Bağlam Analizi
+#### Figure 11 — 4-Panel Cross-Context Overview (Key Visual)
+![Cross-Context](figures/banner_cross-context.png)
 
-#### Şekil 11 — 4-Panel Çapraz-Bağlam Açıklığı (Anahtar Görsel )
-![Cross-Context](figures/banner_capraz_baglam.png)
-
-#### Şekil 12 — Wilcoxon Fold-Bazlı Karşılaştırma
+#### Figure 12 — Wilcoxon Fold-Based Comparison
 ![Wilcoxon](figures/stats/wilcoxon_folds.png)
 
-> **Drive yolu:** `MyDrive/QML_Obesity_ISADES2026/gorseller/wilcoxon_fold_karsilastirma.png`
+> **Drive path:** `MyDrive/QML_Obesity_ISADES2026/images/wilcoxon_fold_comparison.png`
 
-### Açıklanabilirlik (SHAP)
+### Explainability (SHAP)
 
-#### Şekil 13 — XGBoost SHAP İlk Üç Sürücü
+#### Figure 13 — XGBoost SHAP Top Three Drivers
 ![SHAP](figures/shap/combined_shap.png)
 
-| Veri seti | İlk 3 sürücü | SHAP değerleri |
+| Dataset | Top 3 drivers | SHAP values |
 |-----------|--------------|:--------------:|
 | **WBCD** | worst perimeter, worst texture, worst area | 0.928, 0.866, 0.840 |
-| **Obezite** | Weight, Height, Gender | 2.615, 0.475, 0.300 |
+| **Obesity** | Weight, Height, Gender | 2.615, 0.475, 0.300 |
 
 ---
 
-##  Sonuçlar
+##  Results
 
-### Tablo I — WBCD: Tüm Modellerin 5-Katlı CV Sonuçları
+### Table I — WBCD: 5-Fold CV Results for All Models
 
-| Model | Tür | CV Acc | Acc Std | F1 | AUC | Param |
+| Model | Type | CV Acc | Acc Std | F1 | AUC | Param |
 |-------|:---:|:------:|:-------:|:--:|:---:|:-----:|
 | **SVM-RBF** | Kl. | **0.9802** | 0.0044 | **0.9802** | **0.9947** | 200 SV |
 | LR | Kl. | 0.9736 | 0.0054 | 0.9735 | 0.9947 | 31 |
@@ -375,9 +356,9 @@ Saf kodlamaların %61-64 tavanı, hibrit Q3-Plus ile %81.54'e yükseliyor (+19.7
 | QKernel-SVM-4q | Q. | 0.8308 | 0.0226 | 0.8285 | 0.9047 | kernel |
 | QKernel-SVM-6q | Q. | 0.7692 | 0.0184 | 0.7599 | 0.8609 | kernel |
 
-### Tablo II — Obezite: Tüm Modellerin 5-Katlı CV Sonuçları (özet)
+### Table II — Obesity: 5-Fold Cross-Validation Results for All Models (summary)
 
-| Model | Tür | CV Acc | AUC | F1 |
+| Model | Type | CV Acc | AUC | F1 |
 |-------|:---:|:------:|:---:|:--:|
 | **XGBoost-Top10** | Kl. | **0.9623 ± 0.0061** | **0.9971** | **0.9611** |
 | SVM-RBF-Top10 | Kl. | 0.9521 ± 0.0104 | 0.9975 | 0.9498 |
@@ -392,28 +373,28 @@ Saf kodlamaların %61-64 tavanı, hibrit Q3-Plus ile %81.54'e yükseliyor (+19.7
 | Q-ReUpload-6q-2blok | Q. | 0.5908 ± 0.0150 | 0.8801 | 0.5619 |
 | Q-ReUpload-6q-1blok | Q. | 0.5105 ± 0.0174 | 0.8314 | 0.4697 |
 
-### Tablo III — Çapraz-Bağlam Karşılaştırma Özeti
+### Table III — Summary of Cross-Context Comparison
 
-| Boyut | WBCD | Obezite |
+| Dimension | WBCD | Obesity |
 |-------|:----:|:-------:|
-| Sınıf sayısı | 2 (binary) | 7 (multiclass) |
-| Veri kaynağı | %100 gerçek | %77 SMOTE |
-| Klasik şampiyon | SVM-RBF | XGBoost-Top10 |
-| Kuantum şampiyon | VQC ReUpload-6q-3blok | Q-Hybrid-Q3-Plus |
-| Doğruluk farkı | **5.05 puan** | **14.68 puan** |
-| AUC farkı | 0.0049 | 0.0308 |
-| Cohen's d (eşli) | 1.70 (büyük) | 5.13 (çok büyük) |
-| Wilcoxon p (tek-yönlü) | 0.0312* | 0.0312* |
+| Number of classes | 2 (binary) | 7 (multiclass) |
+| Data source | 100% real | 77% SMOTE |
+| Classic champion | SVM-RBF | XGBoost-Top10 |
+| Quantum champion | VQC ReUpload-6q-3blok | Q-Hybrid-Q3-Plus |
+| Accuracy difference | **5.05 points** | **14.68 points** |
+| AUC difference | 0.0049 | 0.0308 |
+| Cohen's d (paired) | 1.70 (large) | 5.13 (very large) |
+| Wilcoxon p (one-tailed) | 0.0312* | 0.0312* |
 
 ---
 
-## 📝 Atıf
+## 📝 Citation
 
-Bu çalışmayı kullanıyorsanız lütfen aşağıdaki şekilde atıfta bulunun:
+If you use this work, please cite it as follows:
 
 ```bibtex
 @inproceedings{qml_health_isades2026,
-  title     = {Sağlık Verileri Üzerinde Klasik--Kuantum Makine Öğrenmesi: Çapraz-Bağlam Karşılaştırmalı Bir Çalışma},
+  title     = {Classical–Quantum Machine Learning on Health Data: A Cross-Context Comparative Study},
   author    = {Tevfik Metin, Atakan Yılmaz, Enes Furkan Kaya, Emine Gülmez, Assoc. Prof. Dr. Muhammet Baykara*},
   booktitle = {ISADES 2026 -- International Symposium on Applied Data Engineering and Sciences},
   year      = {2026},
@@ -422,43 +403,41 @@ Bu çalışmayı kullanıyorsanız lütfen aşağıdaki şekilde atıfta bulunun
 }
 ```
 
-> **Not:** Tam atıf bilgisi makalenin kabul edilmesinin ardından güncellenecektir.
+> **Note:** Full citation information will be updated after the paper is accepted.
 
 ---
 
-##  Yazarlar
+##  Authors
 
-- **[Tevfik Metin]** — *[birim, e-posta]*
-- **[Atakan Yılmaz]** — *[birim, e-posta]*
-- **[Enes Furkan Kaya]** — *[birim, e-posta]*
-- **[Emine Gülmez]** — *[birim, e-posta]*
-- **[Muhammet Baykara]** — Danışman — *[birim, e-posta]*
-
-**Kurum:** Fırat Üniversitesi, Teknoloji Fakültesi, Yazılım Mühendisliği, Elazığ, Türkiye
-
----
-
-##  Katkıda Bulunma
-
-Bu repo bir akademik çalışmanın deneylerini barındırmaktadır. Hata bildirimleri ve sorular için [Issues](../../issues) bölümünü kullanabilirsiniz.
+- **[Tevfik Metin]** — *[affiliation, email]*
+- **[Atakan Yılmaz]** — *[affiliation, email]*
+- **[Enes Furkan Kaya]** — *[department, email]*
+- **[Emine Gülmez]** — *[department, email]*
+- **[Muhammet Baykara]** — Advisor — *[department, email]*
+**Institution:** Fırat University, Faculty of Technology, Software Engineering, Elazığ, Turkey
 
 ---
 
-##  Lisans
+##  Contributing
 
-Bu proje **MIT Lisansı** altında dağıtılmaktadır — detaylar için [LICENSE](LICENSE) dosyasına bakınız.
+This repository contains the experiments from an academic study. Please use the [Issues](../../issues) section for bug reports and questions.
 
-> Veri setleri kendi orijinal lisansları altında kullanılmaktadır:
+---
+
+##  License
+
+This project is distributed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
+
+> Datasets are used under their original licenses:
 > - WBCD: UCI Machine Learning Repository (CC BY 4.0)
-> - Obezite: Data in Brief (CC BY 4.0)
-
+> - Obesity: Data in Brief (CC BY 4.0)
 ---
 
 
 
 <div align="center">
 
-** Bu repo size yararlı olduysa yıldızlamayı unutmayın!**
+** If you found this repo helpful, don’t forget to star it!**
 
 [![GitHub Stars](https://img.shields.io/github/stars/QML-Health/QML-Health-ISADES2026?style=social)](../../stargazers)
 
